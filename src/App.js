@@ -1,15 +1,15 @@
-import './App.css';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter , Routes, Route } from 'react-router-dom';
 import Login from './components/Login';
+import Home from './components/Home';
 
 function App() {
   return (
-    <Router>
+    <BrowserRouter>
     <Routes>
+      <Route path="/" element={<Home />} />
       <Route path="/login" element={<Login />} />
-      <Route path="/" element={<Navigate to="/login" />} />
     </Routes>
-  </Router>
+  </BrowserRouter>
   );
 }
 
