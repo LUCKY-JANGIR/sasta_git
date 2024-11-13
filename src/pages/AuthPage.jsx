@@ -15,9 +15,7 @@ const AuthPage = () => {
 
   const handleGoogleSignIn = async () => {
     try {
-      alert
       await signInWithGoogle();
-
     } catch (error) {
       console.error(error);
     }
@@ -25,39 +23,64 @@ const AuthPage = () => {
 
   const handleEmailSignUp = async () => {
     try {
+      alert("doing");
+
       await signUpWithEmail(email, password);
+      alert("done")
+
     } catch (error) {
       console.error(error);
+      alert("error")
+
     }
   };
 
   const handleEmailLogin = async () => {
     try {
+      alert("doing");
+
       await logInWithEmail(email, password);
+      alert("done")
+
     } catch (error) {
       console.error(error);
+      alert("error")
+
     }
   };
+
+  useEffect(() => {
+    return () => {
+      if (window.recaptchaVerifier) {
+        window.recaptchaVerifier.clear();
+        window.recaptchaVerifier = null;
+      }
+    };
+  }, []);
 
   const handleSendOtp = async () => {
-    const recaptchaVerifier = new RecaptchaVerifier(
-      "recaptcha-container",
-      {
-        size: "invisible",
-        callback: (response) => {
-          console.log("reCAPTCHA solved", response);
+    if (!window.recaptchaVerifier) {
+      window.recaptchaVerifier = new RecaptchaVerifier(
+        "recaptcha-container",
+        {
+          size: "invisible",
+          callback: (response) => {
+            // reCAPTCHA solved, allow sendOtp
+            console.log("reCAPTCHA solved");
+          },
         },
-      },
-      auth
-    );
+        auth
+      );
+    }
 
     try {
-      const result = await sendOtp(phoneNumber, recaptchaVerifier);
+      const result = await sendOtp(phoneNumber, window.recaptchaVerifier);
       setConfirmationResult(result);
     } catch (error) {
-      console.error(error);
+      console.error("Error sending OTP:", error);
     }
   };
+
 
   const handleVerifyOtp = async () => {
     try {
