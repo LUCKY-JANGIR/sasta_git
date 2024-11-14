@@ -1,7 +1,7 @@
 import React from 'react'
-import { Chatnav } from './Chatnav'
-import Chatinputs from './Chatinputs'
-import Chatarea from './Chatarea'
+import { Chatnav } from '../chat/Chatnav'
+import Chatinputs from '../chat/Chatinputs'
+import Chatarea from '../chat/Chatarea'
 
 export default function Mainchat() {
   return (
