@@ -4,10 +4,9 @@ import Projectstab from '../components/Projectstab'
 
 export default function Channel() {
     return (
-        <div className='flex max-h-screen'>
+        <div className='flex max-w-screen  overflow-x-auto max-h-screen'>
             <Communitytab />
             <Projectstab />
-            Communities
         </div>
     )
 }

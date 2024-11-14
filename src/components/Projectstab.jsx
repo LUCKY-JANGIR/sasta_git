@@ -1,5 +1,5 @@
 import React from 'react'
-
+import Mainchat from"./Mainchat";
 export default function Projectstab() {
     const projects = [
         "Project One",
@@ -20,11 +20,22 @@ export default function Projectstab() {
     ];
 
     return (
-        <div className="flex flex-col border-r-2 gap-1 overflow-y-auto w-fit ">
+        <div className='flex w-full my-4'>
+            <div className="flex flex-col  rounded-lg  bg-neutral-900  mx-2 w-[20vw] p-2">
+            <div className=' bg-neutral-950   mb-2 px-2 rounded-md'>
+            <h1 className='my-2'>Community name</h1>
+            </div>
+            <div className='flex flex-col  overflow-y-auto w-fit overflow-x-hidden'>
             {projects.map((project, index) => (
-                <div key={index} className="bg-neutral-900 shadow-md p-1 max-w-[20vw]">
-                    <h2 className="font-thin text-lg">{project}</h2>
+                <div key={index} className=" m-1  w-full ">
+                    <h2 className="font-thin text-sm">{project}</h2>
                 </div>
             ))}
-        </div>)
+            </div>
+        </div>
+        <div className='mx-2 flex size-full bg-neutral-900  rounded-lg overflow-hidden'>
+            <Mainchat/>
+        </div>
+        </div>
+        )
 }
