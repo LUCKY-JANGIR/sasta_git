@@ -1,6 +1,7 @@
 import firebase from "firebase/compat/app";
 import "firebase/compat/auth";
 import 'firebase/compat/firestore'
+import { getStorage } from "firebase/storage";
 import {GoogleAuthProvider, GithubAuthProvider, PhoneAuthProvider} from "firebase/auth"
 
 const firebaseConfig = {
@@ -12,6 +13,7 @@ const firebaseConfig = {
   appId: "1:631812842297:web:f876b881b334a3fd4f7ee8",
 };
 
+
   
 if (!firebase.apps.length) {
   firebase.initializeApp(firebaseConfig);
@@ -21,7 +23,8 @@ if (!firebase.apps.length) {
 
 export const db = firebase.firestore()
 export const auth = firebase.auth();
+export const storage = getStorage();
 export const googleProvider = new firebase.auth.GoogleAuthProvider();
 export const phoneProvider = new firebase.auth.PhoneAuthProvider();
 export const gitProvider = new firebase.auth.GithubAuthProvider();
-export default firebase;
+

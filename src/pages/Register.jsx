@@ -29,7 +29,7 @@ const RegisterPage = () => {
     try {
       const emailMatch = await auth.signInWithPopup(gitProvider);
       console.log("GitHub Sign-in successful:", emailMatch.user);
-      navigate("/home"); // Redirect to the home page
+      navigate("/profile"); // Redirect to the home page
     } catch (error) {
       console.error("GitHub Sign-in error:", error);
     }
@@ -55,12 +55,13 @@ const RegisterPage = () => {
         Username: username,
         Email: email,
         Phone: phone,
+        Password: password,
         ProfilePic: randomProfilePic,
         CreatedAt: new Date(),
       });
 
       alert("Registration successful!");
-      navigate("/home"); // Redirect to the profile page
+      navigate("/profile"); // Redirect to the profile page
     } catch (error) {
       console.error("Registration error:", error);
       alert("Registration failed. Please try again.");
@@ -120,8 +121,8 @@ const RegisterPage = () => {
 
       <button className="group group-hover:before:duration-500 justify-center group-hover:after:duration-500 after:duration-500 hover:border-rose-100 hover:before:[box-shadow:_20px_20px_20px_30px_#a21caf] duration-500 before:duration-500 hover:duration-500 underline-offset-2 hover:after:-right-8 hover:before:-left-12 hover:before:-bottom-8 hover:before:blur hover:underline hover:underline-offset-4  origin-left hover:decoration-2 hover:text-rose-100 relative bg-neutral-800 h-12 w-44 border text-gray-50 text-base text-center font-bold rounded-2xl  overflow-hidden  before:absolute before:w-12 before:h-12 before:content[''] before:right-1 before:top-1 before:z-10 before:bg-violet-500 before:rounded-full before:blur-lg  after:absolute after:z-10 after:w-20 after:h-20 after:content['']  after:bg-rose-300 after:right-8 after:top-3 after:rounded-full after:blur-lg"
       onClick={handleRegister} disabled={loading}>
-        {loading ? "Registering..." : ""}
-        <p className="z-50">Register</p>
+        {loading ? "Registering..." : "Register"}
+        <p className="z-50"></p>
 
       </button>
 

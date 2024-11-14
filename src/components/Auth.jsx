@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { auth, googleProvider } from "../firebaseConfig";
 
 const Auth = () => {
-    const [email, setEmail] = useState("");
+    const [email, setEmail] = useState(""); 
     const [password, setPassword] = useState("");
     const [phone, setPhone] = useState("");
     const [otp, setOtp] = useState("");
