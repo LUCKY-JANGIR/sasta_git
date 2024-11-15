@@ -1,5 +1,6 @@
 import React from 'react'
 import Mainchat from"./Mainchat";
+import { Outlet } from 'react-router-dom';
 export default function Projectstab() {
     const projects = [
         "Project One",
@@ -33,8 +34,8 @@ export default function Projectstab() {
             ))}
             </div>
         </div>
-        <div className='mx-2 flex size-full bg-neutral-900  rounded-lg overflow-hidden'>
-            <Mainchat/>
+        <div className='mx-2 flex size-full border-neutral-700 border-2  rounded-lg overflow-hidden'>
+            <Outlet/>
         </div>
         </div>
         )

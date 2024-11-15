@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from "react-router-dom";
+import { useNavigate,useLocation } from "react-router-dom";
 import { auth, db } from "../../firebaseConfig";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import Cookies from 'js-cookie';
@@ -9,7 +9,7 @@ const Aboutuser = () => {
     const [editableData, setEditableData] = useState({});
     const [isEditing, setIsEditing] = useState(false); // To toggle between view/edit mode
     const navigate = useNavigate();
-
+    const location = useLocation()
     useEffect(() => {
         const fetchUserData = async () => {
             try {
@@ -71,8 +71,8 @@ const Aboutuser = () => {
             }
         };
 
-        fetchUserData();
-    }, [navigate]);
+       fetchUserData();
+    }, [navigate,location]);
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -90,6 +90,7 @@ const Aboutuser = () => {
                 const userRef = doc(db, "Users", user.uid);
                 await updateDoc(userRef, editableData);
                 setUserData(editableData); // Update the UI with new values
+                toggleEditMode();
                 alert("Profile updated successfully!");
 
                 // Save updated session to cookies

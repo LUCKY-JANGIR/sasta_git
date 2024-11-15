@@ -2,13 +2,13 @@ import React from 'react'
 
 export default function Chatcard() {
     return (
-        <div className='bg-[#41f3ff47] border-x-4 border-[#00efff] flex w-full h-fit pt-1'>
-            <div className='mx-2  w-[20vw]'>
+        <div className=' flex w-full h-fit p-2'>
+            <div className='mr-2  w-[20vw]'>
             < img src="https://placehold.co/150x150" className="rounded-[50%] " />
             </div>
-            <div className='text-sm '>
+            <div className='text-sm bg-neutral-950 p-2 rounded-xl border-2 border-neutral-700' >
                 <div className='flex mb-2'>
-                <h1 className='capitalize font-bold pr-1 text-[#00efff]'>name</h1>
+                <h1 className='capitalize font-bold pr-1  text-[#00efff]'>name</h1>
                 <span className=''>data</span>
                 </div>
                 <div>

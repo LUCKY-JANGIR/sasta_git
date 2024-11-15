@@ -37,7 +37,6 @@ const Login = () => {
   const handleEmailLogin = async () => {
     try {
       const result = await auth.signInWithEmailAndPassword(email, password);
-      console.log("Login successful:", result.user);
       navigate('/profile')
     } catch (error) {
       alert("Email and Password didn't match and try again", error);

@@ -1,157 +1,111 @@
 import React, { useEffect, useState } from 'react';
 import { auth, db } from "../../firebaseConfig";
-import { doc, getDoc, collection, query, where, getDocs } from "firebase/firestore";
+import { collection, query, where, getDocs } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
-import Cookies from 'js-cookie';
 
 export default function UserAction() {
-    const [userData, setUserData] = useState(null);
-    const [technologies, setTechnologies] = useState([]);
     const [createdCommunities, setCreatedCommunities] = useState([]);
     const [joinedCommunities, setJoinedCommunities] = useState([]);
-    const [projects, setProjects] = useState([]);
     const navigate = useNavigate();
 
     useEffect(() => {
-        const fetchUserData = async () => {
-            const user = auth.currentUser;
-            
-            if (!user) {
-                return; // Handle user not logged in
+        const unsubscribe = auth.onAuthStateChanged(async (user) => {
+            if (user) {
+                await fetchCommunities(user.uid);
+            } else {
+                navigate("/login");
             }
+        });
 
-            try {
-                // Fetch user data from Users collection
-                const userDoc = await getDoc(doc(db, "Users", user.uid));
-                if (userDoc.exists()) {
-                    setUserData(userDoc.data());
-                    setTechnologies(userDoc.data().technologies || []);
-                }
+        return () => unsubscribe();
+    }, [navigate]);
 
-                // Fetch communities created by the user
-                const createdCommunitiesQuery = query(
-                    collection(db, "Communities"),
-                    where("creator", "==", user.uid)
-                );
-                const createdCommunitiesSnapshot = await getDocs(createdCommunitiesQuery);
-                const createdCommunitiesData = createdCommunitiesSnapshot.docs.map(doc => doc.data());
-                setCreatedCommunities(createdCommunitiesData);
+    const fetchCommunities = async (userId) => {
+        try {
+            const communitiesRef = collection(db, "Communities");
 
-                // Fetch communities the user has joined
-                const joinedCommunitiesQuery = query(
-                    collection(db, "Communities"),
-                    where("members", "array-contains", user.uid)
-                );
-                const joinedCommunitiesSnapshot = await getDocs(joinedCommunitiesQuery);
-                const joinedCommunitiesData = joinedCommunitiesSnapshot.docs.map(doc => doc.data());
-                setJoinedCommunities(joinedCommunitiesData);
+            // Query for created communities
+            const createdQuery = query(communitiesRef, where("creator", "==", userId));
+            const createdSnapshot = await getDocs(createdQuery);
+            const created = createdSnapshot.docs.map((doc) => ({
+                id: doc.id,
+                ...doc.data(),
+            }));
+            setCreatedCommunities(created);
 
-                // Save the communities in the cookie for the session
-                Cookies.set('createdCommunities', JSON.stringify(createdCommunitiesData), { expires: 1 });
-                Cookies.set('joinedCommunities', JSON.stringify(joinedCommunitiesData), { expires: 1 });
-
-                // Fetch projects uploaded by the user
-                const projectsQuery = query(
-                    collection(db, "Projects"),
-                    where("user", "==", user.uid)
-                );
-                const projectsSnapshot = await getDocs(projectsQuery);
-                setProjects(projectsSnapshot.docs.map(doc => doc.data()));
-            } catch (error) {
-                console.error("Error fetching user data:", error);
-            }
-        };
-
-        // Check if the user is logged in and fetch data
-        fetchUserData();
-    }, []);
-
-    // Check cookie for community data on page reload
-    useEffect(() => {
-        const savedCreatedCommunities = Cookies.get('createdCommunities');
-        const savedJoinedCommunities = Cookies.get('joinedCommunities');
-        
-        if (savedCreatedCommunities) {
-            setCreatedCommunities(JSON.parse(savedCreatedCommunities));
+            // Query for joined communities
+            const joinedQuery = query(communitiesRef, where("members", "array-contains", userId));
+            const joinedSnapshot = await getDocs(joinedQuery);
+            const joined = joinedSnapshot.docs.map((doc) => ({
+                id: doc.id,
+                ...doc.data(),
+            }));
+            setJoinedCommunities(joined);
+        } catch (error) {
+            console.error("Error fetching communities:", error);
         }
-        if (savedJoinedCommunities) {
-            setJoinedCommunities(JSON.parse(savedJoinedCommunities));
-        }
-    }, []);
-
-    // Handle logout to clear cookies
-    const handleLogout = () => {
-        Cookies.remove('createdCommunities');
-        Cookies.remove('joinedCommunities');
-        auth.signOut();
-        navigate("/login"); // Redirect to login page after logout
     };
 
-    // Navigate to the CreateCommunity page
-    const handleCreateCommunity = () => {
-        navigate("/createcommunity");
+    const handleCommunityClick = (communityId) => {
+        navigate(`/community/${communityId}`);
     };
 
     return (
-        <div className="flex flex-col p-6 w-full max-h-full overflow-y-auto">
+        <div className="flex flex-col p-6">
             <h1 className="text-4xl font-bold border-b-2 border-gray-600 pb-1 capitalize tracking-wide">
-                User Activity
+                User Communities
             </h1>
 
-            {/* Technologies Known Section */}
-            <div className="mt-8">
-                <h3 className="text-2xl font-bold">Technologies Known</h3>
-                <ul className="mt-4 flex flex-wrap space-x-4">
-                    {technologies.length ? (
-                        technologies.map((tech, index) => (
-                            <li key={index} className="p-2 rounded-lg bg-blue-200">
-                                {tech}
-                            </li>
-                        ))
-                    ) : (
-                        <p>No technologies listed yet.</p>
-                    )}
-                </ul>
-            </div>
-
-            {/* Communities Section */}
-            <div className="mt-8">
-                <h3 className="text-2xl font-bold">Communities</h3>
-
+            <div className="flex flex-wrap gap-8 p-4">
+                
+            <section className="mt-8">
+                <h3 className="text-2xl font-bold">Created Communities</h3>
                 <button
-                    onClick={handleCreateCommunity}
+                    onClick={() => navigate("/createcommunity")}
                     className="mt-4 bg-blue-500 text-white p-2 rounded-lg"
                 >
                     Create Community
                 </button>
+                {createdCommunities.length > 0 ? (
+                    createdCommunities.map((community) => (
+                        <div
+                            key={community.id}
+                            className="p-4 mt-4 rounded-2xl hover:bg-slate-500 hover:b-2-slate hover:border-slate-500 transition-all b-slate-300 border cursor-pointer"
+                            onClick={() => handleCommunityClick(community.id)}
+                        >
+                            {community.logoURL && (
+                                <img src={community.logoURL} alt="Community Logo" className="w-16 h-16 rounded-full mt-2" />
+                            )}
+                            <h5 className="text-lg font-bold">{community.name}</h5>
+                            <p>{community.description}</p>
+                        </div>
+                    ))
+                ) : (
+                    <p>No communities created yet.</p>
+                )}
+            </section>
 
-                <div className="mt-8">
-                    <h4 className="text-xl font-semibold">Created Communities</h4>
-                    {createdCommunities.length ? (
-                        createdCommunities.map((community, index) => (
-                            <div key={index} className="p-4 mt-4 bg-gray-200 rounded-lg">
-                                <h5 className="text-lg font-bold">{community.name}</h5>
-                                <p>{community.description}</p>
-                            </div>
-                        ))
-                    ) : (
-                        <p>No communities created yet.</p>
-                    )}
-                </div>
-
-                <div className="mt-8">
-                    <h4 className="text-xl font-semibold">Joined Communities</h4>
-                    {joinedCommunities.length ? (
-                        joinedCommunities.map((community, index) => (
-                            <div key={index} className="p-4 mt-4 bg-gray-200 rounded-lg">
-                                <h5 className="text-lg font-bold">{community.name}</h5>
-                                <p>{community.description}</p>
-                            </div>
-                        ))
-                    ) : (
-                        <p>No communities joined yet.</p>
-                    )}
-                </div>
+            <section className="mt-8">
+                <h3 className="text-2xl font-bold">Joined Communities</h3>
+                {joinedCommunities.length > 0 ? (
+                    joinedCommunities.map((community) => (
+                        <div
+                            key={community.id}
+                            className="p-4 mt-4 rounded-2xl hover:bg-slate-500 hover:b-2-slate hover:border-slate-500 transition-all b-slate-300 border cursor-pointer"
+                            onClick={() => handleCommunityClick(community.id)}
+                        >
+                            {community.logoURL && (
+                                <img src={community.logoURL} alt="Community Logo" className="w-16 rounded-full h-16 mt-2" />
+                            )}
+                            <h5 className="text-lg font-bold">{community.name}</h5>
+                            <p>{community.description}</p>
+                            
+                        </div>
+                    ))
+                ) : (
+                    <p>No communities joined yet.</p>
+                )}
+            </section>
             </div>
         </div>
     );

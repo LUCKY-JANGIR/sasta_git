@@ -88,7 +88,7 @@ button:hover {
   border: 2px solid rgb(255, 255, 255);
 }
 
-.inputGroup input {
+.inputGroup input, textarea {
   font-size: 100%;
   padding: 0.8em;
   outline: none;

@@ -1,112 +1,79 @@
 import React, { useState } from 'react';
-import { db, auth, storage } from "../firebaseConfig"; // Ensure storage is configured for logo upload
-import { doc, setDoc } from "firebase/firestore";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { auth, db } from "../firebaseConfig";
+import { collection, addDoc } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
-import { v4 as uuidv4 } from 'uuid';
 
 export default function CreateCommunity() {
     const [name, setName] = useState("");
     const [description, setDescription] = useState("");
-    const [logo, setLogo] = useState(null);
-    const [logoPreview, setLogoPreview] = useState(null);
+    const [logoURL, setLogoURL] = useState("");
     const navigate = useNavigate();
 
-    // Handle file input for logo
-    const handleLogoChange = (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            setLogo(file);
-            setLogoPreview(URL.createObjectURL(file)); // Preview the selected logo
-        }
-    };
-
-    // Create community and upload data
-    const handleSubmit = async (e) => {
+    const handleCreateCommunity = async (e) => {
         e.preventDefault();
 
-        // Validate form fields
-        if (!name || !description || !logo) {
-            alert("Please fill out all fields.");
-            return;
-        }
-
         try {
-            // Generate unique ID for the community
-            const communityId = uuidv4();
+            const user = auth.currentUser;
+            if (!user) {
+                console.log("User not logged in.");
+                return;
+            }
 
-            // Upload logo to Firebase Storage
-            const logoRef = ref(storage, `communityLogos/${communityId}-${logo.name}`);
-            await uploadBytes(logoRef, logo);
-            const logoURL = await getDownloadURL(logoRef);
+            // Create a new community document in Firestore
+            await addDoc(collection(db, "Communities"), {
+                name: name,
+                description: description,
+                logoURL: logoURL,
+                creator: user.uid,
+                members: [user.uid] // Add creator as a member by default
+            });
 
-            // Save community data to Firestore
-            const communityData = {
-                name,
-                description,
-                logo: logoURL,
-                creator: auth.currentUser.uid,
-                members: [auth.currentUser.uid], // Automatically join the creator
-                createdAt: new Date(),
-            };
-            await setDoc(doc(db, "Communities", communityId), communityData);
-
-            alert("Community created successfully!");
-            navigate("/useraction"); // Redirect to user action page or communities list
-
+            console.log("Community created successfully!");
+            navigate("/profile"); // Redirect to UserAction page after creation
         } catch (error) {
             console.error("Error creating community:", error);
-            alert("Failed to create community. Please try again.");
         }
     };
 
     return (
-        <div className="flex flex-col items-center p-6">
-            <h1 className="text-4xl font-bold border-b-2 border-gray-600 pb-1 capitalize tracking-wide mb-6">
-                Create a New Community
-            </h1>
-
-            <form onSubmit={handleSubmit} className="w-full max-w-md space-y-4">
-                <div>
-                    <label className="block text-lg font-semibold mb-2">Community Name</label>
+        <div className="p-6">
+            <h2 className="text-3xl font-bold mb-4">Create a Community</h2>
+            <form onSubmit={handleCreateCommunity}>
+                <label className="block text-lg font-semibold mt-4">
+                    
+                    <div className="inputGroup">
                     <input
                         type="text"
                         value={name}
+                        placeholder='Community Name'
                         onChange={(e) => setName(e.target.value)}
-                        className="w-full p-2 border rounded-lg"
-                        placeholder="Enter community name"
                         required
                     />
-                </div>
-
-                <div>
-                    <label className="block text-lg font-semibold mb-2">Description</label>
+                    </div>
+                </label>
+                <label className="block text-lg font-semibold mt-4">
+                    <div className="inputGroup">
                     <textarea
                         value={description}
+                        placeholder='Enter the description for your community'
                         onChange={(e) => setDescription(e.target.value)}
-                        className="w-full p-2 border rounded-lg"
-                        placeholder="Enter a brief description"
                         required
                     />
-                </div>
-
-                <div>
-                    <label className="block text-lg font-semibold mb-2">Community Logo</label>
+                    </div>
+                </label>
+                <label className="block text-lg font-semibold mt-4">
+                    <div className="inputGroup">
                     <input
-                        type="file"
-                        accept="image/*"
-                        onChange={handleLogoChange}
-                        className="w-full p-2 border rounded-lg"
-                        required
+                        type="text"
+                        value={logoURL}
+                        placeholder='Logo URL'
+                        onChange={(e) => setLogoURL(e.target.value)}
                     />
-                    {logoPreview && (
-                        <img src={logoPreview} alt="Logo Preview" className="mt-4 h-32 w-32 object-cover rounded-full" />
-                    )}
-                </div>
-
+                    </div>
+                </label>
                 <button
                     type="submit"
-                    className="w-full bg-blue-500 text-white py-2 rounded-lg font-semibold mt-4"
+                    className="mt-6 bg-blue-500 text-white p-3 rounded"
                 >
                     Create Community
                 </button>
